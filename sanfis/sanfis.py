@@ -140,7 +140,7 @@ class SANFIS(nn.Module):
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
 
-    def fit(self, train_data: List[torch.Tensor], valid_data: List[torch.Tensor], optimizer: Callable, loss_function: Callable, batch_size: int = 16, shuffle_batches: bool = True, epochs: int = 100, patience: int = 10, delta: float = 1e-5, use_tensorboard: bool = False, logdir: Optional[str] = None, hparams_dict: dict = {}, disable_output: bool = False) -> pd.DataFrame:
+    def fit(self, train_data: List[torch.Tensor], valid_data: List[torch.Tensor], optimizer: Callable, loss_function: Callable, batch_size: int = 16, shuffle_batches: bool = False, epochs: int = 100, patience: int = 10, delta: float = 1e-5, use_tensorboard: bool = False, logdir: Optional[str] = None, hparams_dict: dict = {}, disable_output: bool = False) -> pd.DataFrame:
         """Model fitting function.
 
         Args:
@@ -708,9 +708,19 @@ class _ConsequenceLayer(nn.Module):
 
     def reset_parameters(self):
         with torch.no_grad():
+            torch.manual_seed(42)
+            torch.cuda.manual_seed(42)
+            torch.use_deterministic_algorithms(True)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
             self._weight[:] = torch.rand(
                 self.n, self.rules) - 0.5
 
+            torch.manual_seed(42)
+            torch.cuda.manual_seed(42)
+            torch.use_deterministic_algorithms(True)
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
             self._bias[:] = torch.rand(1, self.rules) - 0.5
 
     def forward(self, input_, wnorm):
